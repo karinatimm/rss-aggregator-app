@@ -2,18 +2,39 @@
 // in the Yup validation error
 import onChange from "on-change";
 import * as yup from "yup";
+import { renderFeedback } from "./view.js";
+import i18next from "i18next";
+import ru from "./locales/ru.js";
+import en from "./locales/en.js";
+
+const defaultLanguage = "ru";
+
+const i18nInstance = i18next.createInstance();
+i18nInstance.init({
+  lng: defaultLanguage,
+  debug: false,
+  resources: {
+    ru,
+    en,
+  },
+});
+
+yup.setLocale({
+  mixed: {
+    notOneOf: () => ({ key: "errors.rssAlreadyExists" }),
+  },
+  string: {
+    url: () => ({ key: "errors.invalidUrl" }),
+  },
+});
 
 const createValidationSchema = (state) => {
-  // Extract all existing feed URLs from state
-  const urlOfExistingFeeds = state.feeds.map((feed) => feed.url);
-  return yup.object().shape({
-    url: yup
-      .string()
-      .trim()
-      .required("URL is required!")
-      .url("Invalid URL! Check it again.")
-      .notOneOf(urlOfExistingFeeds, "URL already exists!"),
-  });
+  return yup
+    .string()
+    .trim()
+    .required()
+    .url()
+    .notOneOf(state.form.arrOfValidUrls);
 };
 
 const validateInputValue = (state, url) => {
@@ -22,11 +43,32 @@ const validateInputValue = (state, url) => {
 };
 
 const app = () => {
+  const state = {
+    lng: defaultLanguage,
+    form: {
+      loadingProcess: {
+        processState: "filling",
+        processError: null,
+      },
+      isValid: true,
+      validErrors: null,
+      arrOfValidUrls: [],
+      networkError: false,
+    },
+    posts: [],
+    feeds: [],
+    stateUi: {
+      // состояние того, как отображается страница
+      clickedIdPosts: [], // seenPosts
+      modalWinContent: null,
+    },
+  };
+
   const elements = {
     formEl: {
       formInput: document.querySelector("#url-input"),
       form: document.querySelector(".rss-form"),
-      submitBtn: document.querySelector(".btn-lg"),
+      addUrlBtn: document.querySelector(".btn-lg"),
       feedback: document.querySelector(".feedback"),
       formTitle: document.querySelector(".display-3"),
       formSubtitle: document.querySelector(".lead"),
@@ -45,50 +87,9 @@ const app = () => {
       feedsContainer: document.querySelector(".feeds"),
       postsContainer: document.querySelector(".posts"),
     },
-  };
-  const defaultLanguage = "ru";
-
-  const state = {
-    lng: defaultLanguage,
-    form: {
-      loadingProcess: {
-        processState: "filling",
-        processError: null,
-      },
-      isValid: true,
-      validErrors: null,
-      feedbackMsg: "",
-      networkError: false,
+    footer: {
+      authorContainer: document.querySelector(".text-center"),
     },
-    posts: [],
-    feeds: [],
-    stateUi: {
-      // состояние того, как отображается страница
-      clickedIdPosts: [], // seenPosts
-      modalWinContent: null,
-    },
-  };
-  const renderFeedback = (watchedState, elements) => {
-    // Clear previous classes
-    elements.formEl.feedback.classList.remove("text-danger", "text-success");
-    elements.formEl.formInput.classList.remove("is-invalid");
-
-    if (!watchedState.form.isValid) {
-      // Display error feedback
-      elements.formEl.feedback.classList.add("text-danger");
-      elements.formEl.formInput.classList.add("is-invalid");
-
-      // Set feedback text based on the validation error
-      elements.formEl.feedback.textContent = watchedState.form.validErrors;
-    } else {
-      // Display success feedback
-      elements.formEl.feedback.classList.add("text-success");
-      // Clear the form input and set focus
-      elements.formEl.formInput.value = "";
-      elements.formEl.formInput.focus();
-      // Clear feedback text on success
-      elements.formEl.feedback.textContent = "";
-    }
   };
 
   // ensures renderTextContent function will be automatically called whenever there is a
@@ -108,13 +109,15 @@ const app = () => {
         // Validation successful
         watchedState.isValid = true;
         watchedState.form.validErrors = null;
-        renderFeedback(watchedState, elements);
+        watchedState.networkError = false;
+        watchedState.form.arrOfValidUrls.push(inputUrlByUser);
+        console.log(watchedState.form.arrOfValidUrls);
       })
       .catch((error) => {
         // Validation failed
         watchedState.form.isValid = false;
-        watchedState.form.validErrors = error.message;
-        renderFeedback(watchedState, elements);
+        watchedState.form.validErrors = i18nInstance.t(error.key); //error.message
+        console.log(error.key);
       });
   });
 };
