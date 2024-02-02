@@ -1,22 +1,53 @@
-export const renderFeedback = (watchedState, elements) => {
-  // Clear previous classes
-  elements.formEl.feedback.classList.remove("text-danger", "text-success");
-  elements.formEl.formInput.classList.remove("is-invalid");
+export const renderFeedbacksAndErrors = (
+  watchedState,
+  i18nInstance,
+  elements
+) => {
+  const {
+    formEl: { formInput, feedback, addUrlBtn, form },
+  } = elements;
 
-  if (!watchedState.form.isValid) {
-    // Display error feedback
-    elements.formEl.feedback.classList.add("text-danger");
-    elements.formEl.formInput.classList.add("is-invalid");
+  feedback.classList.remove("text-danger", "text-success", "rss-uploading");
+  formInput.classList.remove("is-invalid");
+  addUrlBtn.removeAttribute("disabled");
 
-    // Set feedback text based on the validation error
-    elements.formEl.feedback.textContent = watchedState.form.validErrors;
-  } else {
-    // Display success feedback
-    elements.formEl.feedback.classList.add("text-success");
-    // Clear the form input and set focus
-    elements.formEl.formInput.value = "";
-    elements.formEl.formInput.focus();
-    // Clear feedback text on success
-    elements.formEl.feedback.textContent = "";
+  switch (watchedState.form.loadingProcess.processState) {
+    case "processingRequest": {
+      addUrlBtn.setAttribute("disabled", "");
+      feedback.textContent = i18nInstance.t("rssIsLoading");
+      feedback.classList.add("rss-uploading");
+      break;
+    }
+    case "completed": {
+      addUrlBtn.removeAttribute("disabled");
+      feedback.classList.add("text-success");
+      feedback.textContent = i18nInstance.t("rssUploaded");
+      form.reset();
+      formInput.focus();
+      break;
+    }
+    case "responseAndNetworkError": {
+      addUrlBtn.removeAttribute("disabled");
+      formInput.classList.add("is-invalid");
+      feedback.classList.add("text-danger");
+
+      feedback.textContent = navigator.onLine
+        ? watchedState.form.loadingProcess.processError
+        : watchedState.form.loadingProcess.processErrorNetwork;
+      break;
+    }
+    case "validationError": {
+      addUrlBtn.removeAttribute("disabled");
+      formInput.classList.add("is-invalid");
+      feedback.textContent = watchedState.form.validError;
+      //   console.log(feedback.textContent);
+      feedback.classList.add("text-danger");
+      break;
+    }
+    default: {
+      throw new Error(
+        `Uknown error: ${watchedState.form.loadingProcess.processState}`
+      );
+    }
   }
 };
