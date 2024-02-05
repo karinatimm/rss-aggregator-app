@@ -2,7 +2,7 @@
 // in the Yup validation error
 import onChange from "on-change";
 import * as yup from "yup";
-import { renderFeedbacksAndErrors } from "./view.js";
+import { renderUIView } from "./view.js";
 import i18next from "i18next";
 import ru from "./locales/ru.js";
 import en from "./locales/en.js";
@@ -12,7 +12,9 @@ import {
   generateAxiosGetRequestUrl,
   generateNewFeedObj,
   generateNewPostsObjOfFeed,
+  checkActualRss,
 } from "./helpers.js";
+import { controlClickedPostLinks } from "./controller.js";
 import _ from "lodash";
 
 const defaultLanguage = "ru";
@@ -51,6 +53,90 @@ const validateInputValue = (state, url) => {
   const validationSchema = createValidationSchema(state);
   return validationSchema.validate(url);
 };
+const getNewPostTitlesByComparison = (
+  arrOfNewPostsTitles,
+  arrOfExistingPostsTitles
+) =>
+  arrOfNewPostsTitles.filter(
+    (newPost) => !arrOfExistingPostsTitles.includes(newPost)
+  );
+
+// function is responsible for fetching new posts from an RSS feed, comparing
+// them with the existing posts, and adding any new posts to the watchedState.posts.
+const updateWatchedStateWithNewPosts = (
+  state,
+  newInputUrlByUser,
+  watchedState
+) => {
+  axios
+    .get(generateAxiosGetRequestUrl(newInputUrlByUser))
+    .then((newResponseData) => {
+      const arrOfNewPostsTitles = parseRSSFeed(newResponseData).posts.map(
+        (post) => post.title
+      );
+      // console.log(arrOfNewPostsTitles);
+
+      // find the feed object corresponding to the chosen URL
+      const foundFeedObj = state.feeds.find(
+        (feedObj) => feedObj.url === newInputUrlByUser
+      );
+      // console.log(state.feeds);
+      // console.log(foundFeedObj);
+
+      const feedIdOfFoundFeedObj = foundFeedObj.feedId;
+      // console.log(feedIdOfFoundFeedObj);
+
+      // find posts in the state corresponding to the feed ID
+      const existingPostsOfFeedId = state.posts
+        .flat()
+        .filter((post) => post.feedId === feedIdOfFoundFeedObj);
+      // console.log(existingPostsOfFeedId);
+
+      // extract titles of existing posts
+      const arrOfExistingPostsTitles = existingPostsOfFeedId.map(
+        (post) => post.title
+      );
+      // console.log(arrOfExistingPostsTitles);
+
+      // check for new posts
+      const arrOfNewPostsTitlesForAdding = getNewPostTitlesByComparison(
+        arrOfNewPostsTitles,
+        arrOfExistingPostsTitles
+      );
+      console.log(arrOfNewPostsTitlesForAdding);
+
+      if (arrOfNewPostsTitlesForAdding.length > 0) {
+        // filters the posts array to include only those posts whose titles are present in
+        // the newPostObjForAdding array
+        const newPostObjForAdding = parseRSSFeed(newResponseData).posts.filter(
+          (post) => arrOfNewPostsTitlesForAdding.includes(post.title)
+        );
+        console.log(newPostObjForAdding);
+
+        const updatedPostsObj = generateNewPostsObjOfFeed(
+          newPostObjForAdding,
+          feedIdOfFoundFeedObj
+        );
+        // console.log(updatedPostsObj);
+        watchedState.posts.push(updatedPostsObj);
+      }
+    })
+    .catch((err) => console.log(err));
+};
+
+const startRssChecking = (state, elements, watchedState) => {
+  const arrOfUpdatedPostsPromises = Promise.all(
+    state.form.arrOfValidUrls.map((url) =>
+      updateWatchedStateWithNewPosts(state, url, watchedState)
+    )
+  );
+
+  arrOfUpdatedPostsPromises.finally(
+    setTimeout(() => {
+      startRssChecking(state, elements, watchedState);
+    }, 5000)
+  );
+};
 
 const app = () => {
   const elements = {
@@ -73,8 +159,11 @@ const app = () => {
     },
 
     feedsAndPostsEl: {
-      feedsContainer: document.querySelector(".feeds"),
-      postsContainer: document.querySelector(".posts"),
+      feedsMainDivContainer: document.querySelector(".feeds"),
+      postsMainDivContainer: document.querySelector(".posts"),
+      h2FeedCardTitle: i18nInstance.t("feedCardTitle"),
+      h2PostCardTitle: i18nInstance.t("postCardTitle"),
+      watchBtn: i18nInstance.t("buttons.watchPostBtn"),
     },
     footer: {
       authorContainer: document.querySelector(".text-center"),
@@ -87,9 +176,7 @@ const app = () => {
       loadingProcess: {
         processState: "formFilling",
         processError: null,
-        processErrorNetwork: null,
       },
-      isValid: true,
       validError: null,
       arrOfValidUrls: [],
       feedbackMessage: "",
@@ -97,17 +184,16 @@ const app = () => {
     posts: [],
     feeds: [],
     stateUi: {
-      // состояние того, как отображается страница
-      clickedIdPosts: [], // seenPosts
+      arrOfClickedPostLinks: [],
       modalWinContent: null,
     },
   };
-  // ensures renderTextContent function will be automatically called whenever there is a
-  // change in the watchedState
 
-  const watchedState = onChange(state, () => {
-    renderFeedbacksAndErrors(watchedState, i18nInstance, elements);
+  const watchedState = onChange(state, (pathToEl) => {
+    renderUIView(watchedState, i18nInstance, elements)(pathToEl);
   });
+
+  controlClickedPostLinks(watchedState, elements);
 
   elements.formEl.form.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -116,18 +202,14 @@ const app = () => {
     // console.log(inputUrlByUser);
     watchedState.form.loadingProcess.processState = "formFilling";
     validateInputValue(watchedState, inputUrlByUser) // promise is pending
-      // if validation is successful save this url into variable validUserUrl
       // receives the validUserUrl as the resolved value (resolved proise)
       .then((validUserUrl) => {
         watchedState.form.loadingProcess.processState = "completed";
         // promise is resolved (fulfilled)
         // Validation successful
-        watchedState.isValid = true;
-        watchedState.form.validErrors = null;
-        watchedState.networkError = false;
+        watchedState.form.processError = null;
         watchedState.form.arrOfValidUrls.push(inputUrlByUser);
         // console.log(Array.from(watchedState.form.arrOfValidUrls));
-        // make request
         watchedState.form.loadingProcess.processState = "processingRequest";
         axios
           .get(generateAxiosGetRequestUrl(validUserUrl)) // promise is pending
@@ -157,33 +239,29 @@ const app = () => {
             console.log(Array.from(watchedState.feeds));
             watchedState.posts.push(postsObjOfCurrentFeed);
 
-            watchedState.form.feedbackMessage = i18nInstance.t("rssUploaded");
-            // console.log(watchedState.form.feedbackMessage);
+            startRssChecking(state, elements, watchedState);
           })
           .catch((error) => {
             watchedState.form.loadingProcess.processState =
               "responseAndNetworkError";
-            watchedState.form.isValid = false;
             if (
               error.message ===
               "Parsing error: The XML document is not well-formed"
             ) {
               watchedState.form.loadingProcess.processError =
                 i18nInstance.t("errors.noValidRss");
-              // console.log(watchedState.form.processErrorNetwork);
             }
             // The navigator.onLine check if the browser has internet access
             if (!navigator.onLine) {
-              watchedState.form.loadingProcess.processErrorNetwork =
-                i18nInstance.t("errors.errorNetwork");
-              // console.log(watchedState.form.loadingProcess.processErrorNetwork);
+              watchedState.form.loadingProcess.processError = i18nInstance.t(
+                "errors.errorNetwork"
+              );
             }
           });
       })
       .catch((error) => {
         // Validation failed
         watchedState.form.loadingProcess.processState = "validationError";
-        watchedState.form.isValid = false;
         watchedState.form.validError = i18nInstance.t(error.message.key); //error.message
         // console.log(error.message.key);
       });

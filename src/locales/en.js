@@ -7,8 +7,8 @@ export default {
     urlExample: "Exapmle: https://ru.hexlet.io/lessons.rss",
     rssUploaded: "RSS uploaded successfully",
     rssIsLoading: "RSS is loading",
-    feedsTitle: "Feeds",
-    postsTitle: "Posts",
+    feedCardTitle: "Фиды",
+    postCardTitle: "Посты",
     authorContainer: "created by",
     buttons: {
       addUrlBtn: "Add",

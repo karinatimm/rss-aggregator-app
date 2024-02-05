@@ -7,12 +7,12 @@ export default {
     urlExample: "Пример: https://ru.hexlet.io/lessons.rss",
     rssUploaded: "RSS успешно загружен", // rssLoaded should create
     rssIsLoading: "RSS загружается", // should create
-    feedsTitle: "Фиды", // feedElTitle should create feedTitle
-    postsTitle: "Посты", // postElTitle should create postTitle
+    feedCardTitle: "Фиды",
+    postCardTitle: "Посты",
     authorContainer: "создано",
     buttons: {
       addUrlBtn: "Добавить",
-      watchBtn: "Просмотр", // btnWatch should create
+      watchPostBtn: "Просмотр", // btnWatch should create
       modalReadBtn: "Читать полностью",
       modalCloseBtn: "Закрыть",
     },
