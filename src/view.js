@@ -102,16 +102,16 @@ const renderPosts = (watchedState, elements) => {
   } = elements;
 
   const { posts } = watchedState;
-  console.log(posts);
+  //   console.log(posts);
 
   if (!postsMainDivContainer.querySelector("div")) {
     renderFeedAndPostCardContainer(postsMainDivContainer, elements);
   }
 
-  // сonvert the Proxy object to an array
-  const actualPostsArray = posts[0];
+  const lastAddedRss = posts.at(-1);
+  //   console.log(lastAddedRss);
 
-  actualPostsArray.forEach((postInRss) => {
+  lastAddedRss.forEach((postInRss) => {
     // create li element
     const li = document.createElement("li");
     li.classList.add(
@@ -146,56 +146,6 @@ const renderPosts = (watchedState, elements) => {
     li.append(watchPostBtn);
   });
 };
-
-// const renderPosts = (watchedState, elements) => {
-//     const {
-//       feedsAndPostsEl: { postsMainDivContainer },
-//     } = elements;
-
-//     const { posts } = watchedState;
-
-//     if (!postsMainDivContainer.querySelector("div")) {
-//       renderFeedAndPostCardContainer(postsMainDivContainer, elements);
-//     }
-
-//     const lastAddedRss = posts.at(-1);
-
-//     // iterate over each post
-//     lastAddedRss.forEach((postInRss) => {
-//       // create li element
-//       const li = document.createElement("li");
-//       li.classList.add(
-//         "list-group-item",
-//         "d-flex",
-//         "justify-content-between",
-//         "align-items-start",
-//         "border-0",
-//         "border-end-0"
-//       );
-
-//       // create href a
-//       const aHref = document.createElement("a");
-//       aHref.setAttribute("href", `${postInRss.link}`);
-//       aHref.setAttribute("class", "fw-bold");
-//       aHref.setAttribute("target", "_blank");
-//       aHref.setAttribute("data-id", `${postInRss.postId}`);
-//       aHref.setAttribute("rel", "noopener noreferrer");
-//       aHref.textContent = postInRss.title;
-
-//       li.append(aHref);
-//       postsMainDivContainer.querySelector("ul").prepend(li);
-
-//       const watchPostBtn = document.createElement("button");
-//       watchPostBtn.setAttribute("type", "button");
-//       watchPostBtn.classList.add("btn", "btn-outline-primary", "btn-sm");
-//       watchPostBtn.setAttribute("data-id", `${postInRss.postId}`);
-//       watchPostBtn.setAttribute("data-bs-toggle", "modal");
-//       watchPostBtn.setAttribute("data-bs-target", "#modal");
-//       watchPostBtn.textContent = elements.feedsAndPostsEl.watchBtn;
-
-//       li.append(watchPostBtn);
-//     });
-//   };
 
 const renderClickedPostLinks = (watchedState, elements) => {
   const {

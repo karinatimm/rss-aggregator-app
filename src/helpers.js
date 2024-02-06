@@ -78,10 +78,12 @@ export const updateRssPostsWithTimer = (watchedStatestate) => {
       const arrOfNewPosts = responsesData.flatMap(
         (responseData) => parseRSSFeed(responseData).posts
       );
+      console.log(arrOfNewPosts);
 
       const existingPostsLinks = watchedStatestate.posts
         .flat()
         .map((post) => post.link);
+      console.log(existingPostsLinks);
 
       const arrOfNewPostsForAdding = arrOfNewPosts.filter(
         (post) => !existingPostsLinks.includes(post.link)
@@ -92,7 +94,7 @@ export const updateRssPostsWithTimer = (watchedStatestate) => {
       }
     })
     .catch((error) => {
-      console.log(`Receive error in parsing rss - ${error.message}`);
+      console.log(`Parse error: ${error.message}`);
     })
     .finally(() => {
       const updateTimer = 5000;

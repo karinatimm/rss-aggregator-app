@@ -105,12 +105,10 @@ const app = () => {
   };
 
   const watchedState = onChange(state, (pathToEl) => {
-    renderUIView(watchedState, i18nInstance, elements)(pathToEl);
+    renderUIView(state, i18nInstance, elements)(pathToEl);
   });
 
   controlClickedPostLinks(watchedState, elements);
-
-  updateRssPostsWithTimer(watchedState);
 
   elements.formEl.form.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -155,7 +153,8 @@ const app = () => {
             watchedState.feeds.push(feedObj);
             // console.log(watchedState.feeds);
             watchedState.posts.push(postsObjOfCurrentFeed);
-            // console.log(watchedState.posts);
+            // console.log(watchedState.posts[0]);
+            updateRssPostsWithTimer(watchedState);
           })
           .catch((error) => {
             watchedState.form.loadingProcess.processState =
