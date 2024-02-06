@@ -24,3 +24,9 @@ export const controlClickedPostLinks = (watchedState, elements) => {
 
   postsMainDivContainer.addEventListener("click", handleViewedPost);
 };
+
+// export const controlModalWindow = (watchedState, elements) => {
+//   const {
+//     feedsAndPostsEl: { postsMainDivContainer },
+//   } = elements;
+// };

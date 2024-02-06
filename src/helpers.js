@@ -1,3 +1,5 @@
+import axios from "axios";
+
 export const parseRSSFeed = (rssData) => {
   const {
     data: { contents },
@@ -65,87 +67,35 @@ export const generateNewPostsObjOfFeed = (parsedResponseData, uniqueFeedId) => {
   return posts;
 };
 
-export const getNewPostTitlesByComparison = (
-  arrOfNewPostsTitles,
-  arrOfExistingPostsTitles
-) =>
-  arrOfNewPostsTitles.filter(
-    (newPost) => !arrOfExistingPostsTitles.includes(newPost)
-  );
+export const updateRssPostsWithTimer = (watchedStatestate) => {
+  const arrOfAxiosRequests = watchedStatestate.feeds.map(({ url }) => {
+    const updatedUrl = generateAxiosGetRequestUrl(url);
+    return axios.get(updatedUrl);
+  });
 
-// function is responsible for fetching new posts from an RSS feed, comparing
-// them with the existing posts, and adding any new posts to the watchedState.posts.
-export const updateWatchedStateWithNewPosts = (
-  state,
-  newInputUrlByUser,
-  watchedState
-) => {
-  axios
-    .get(generateAxiosGetRequestUrl(newInputUrlByUser))
-    .then((newResponseData) => {
-      const arrOfNewPostsTitles = parseRSSFeed(newResponseData).posts.map(
-        (post) => post.title
+  Promise.all(arrOfAxiosRequests)
+    .then((responsesData) => {
+      const arrOfNewPosts = responsesData.flatMap(
+        (responseData) => parseRSSFeed(responseData).posts
       );
-      // console.log(arrOfNewPostsTitles);
 
-      // Find the feed object corresponding to the chosen URL
-      const foundFeedObj = state.feeds.find(
-        (feedObj) => feedObj.url === newInputUrlByUser
-      );
-      // console.log(state.feeds);
-      // console.log(foundFeedObj);
-
-      const feedIdOfFoundFeedObj = foundFeedObj.feedId;
-      // console.log(feedIdOfFoundFeedObj);
-
-      // find posts in the state corresponding to the feed ID
-      const existingPostsOfFeedId = state.posts
+      const existingPostsLinks = watchedStatestate.posts
         .flat()
-        .filter((post) => post.feedId === feedIdOfFoundFeedObj);
-      // console.log(existingPostsOfFeedId);
+        .map((post) => post.link);
 
-      // extract titles of existing posts
-      const arrOfExistingPostsTitles = existingPostsOfFeedId.map(
-        (post) => post.title
+      const arrOfNewPostsForAdding = arrOfNewPosts.filter(
+        (post) => !existingPostsLinks.includes(post.link)
       );
-      // console.log(arrOfExistingPostsTitles);
 
-      // check for new posts
-      const arrOfNewPostsTitlesForAdding = getNewPostTitlesByComparison(
-        arrOfNewPostsTitles,
-        arrOfExistingPostsTitles
-      );
-      console.log(arrOfNewPostsTitlesForAdding);
-
-      if (arrOfNewPostsTitlesForAdding.length > 0) {
-        // filters the posts array to include only those posts whose titles are present in
-        // the newPostObjForAdding array
-        const newPostObjForAdding = parseRSSFeed(newResponseData).posts.filter(
-          (post) => arrOfNewPostsTitlesForAdding.includes(post.title)
-        );
-        console.log(newPostObjForAdding);
-
-        const updatedPostsObj = generateNewPostsObjOfFeed(
-          newPostObjForAdding,
-          feedIdOfFoundFeedObj
-        );
-        // console.log(updatedPostsObj);
-        watchedState.posts.push(updatedPostsObj);
+      if (arrOfNewPostsForAdding.length > 0) {
+        watchedStatestate.posts.push(...arrOfNewPostsForAdding);
       }
     })
-    .catch((err) => console.log(err));
-};
-
-export const startRssChecking = (state, elements, watchedState) => {
-  const arrOfUpdatedPostsPromises = Promise.all(
-    state.form.arrOfValidUrls.map((url) =>
-      updateWatchedStateWithNewPosts(state, url, watchedState)
-    )
-  );
-
-  arrOfUpdatedPostsPromises.finally(
-    setTimeout(() => {
-      startRssChecking(state, elements, watchedState);
-    }, 5000)
-  );
+    .catch((error) => {
+      console.log(`Receive error in parsing rss - ${error.message}`);
+    })
+    .finally(() => {
+      const updateTimer = 5000;
+      setTimeout(() => updateRssPostsWithTimer(watchedStatestate), updateTimer);
+    });
 };

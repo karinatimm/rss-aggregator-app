@@ -12,7 +12,7 @@ import {
   generateAxiosGetRequestUrl,
   generateNewFeedObj,
   generateNewPostsObjOfFeed,
-  checkActualRss,
+  updateRssPostsWithTimer,
 } from "./helpers.js";
 import { controlClickedPostLinks } from "./controller.js";
 import _ from "lodash";
@@ -53,91 +53,6 @@ const validateInputValue = (state, url) => {
   const validationSchema = createValidationSchema(state);
   return validationSchema.validate(url);
 };
-const getNewPostTitlesByComparison = (
-  arrOfNewPostsTitles,
-  arrOfExistingPostsTitles
-) =>
-  arrOfNewPostsTitles.filter(
-    (newPost) => !arrOfExistingPostsTitles.includes(newPost)
-  );
-
-// function is responsible for fetching new posts from an RSS feed, comparing
-// them with the existing posts, and adding any new posts to the watchedState.posts.
-const updateWatchedStateWithNewPosts = (
-  state,
-  newInputUrlByUser,
-  watchedState
-) => {
-  axios
-    .get(generateAxiosGetRequestUrl(newInputUrlByUser))
-    .then((newResponseData) => {
-      const arrOfNewPostsTitles = parseRSSFeed(newResponseData).posts.map(
-        (post) => post.title
-      );
-      // console.log(arrOfNewPostsTitles);
-
-      // find the feed object corresponding to the chosen URL
-      const foundFeedObj = state.feeds.find(
-        (feedObj) => feedObj.url === newInputUrlByUser
-      );
-      // console.log(state.feeds);
-      // console.log(foundFeedObj);
-
-      const feedIdOfFoundFeedObj = foundFeedObj.feedId;
-      // console.log(feedIdOfFoundFeedObj);
-
-      // find posts in the state corresponding to the feed ID
-      const existingPostsOfFeedId = state.posts
-        .flat()
-        .filter((post) => post.feedId === feedIdOfFoundFeedObj);
-      // console.log(existingPostsOfFeedId);
-
-      // extract titles of existing posts
-      const arrOfExistingPostsTitles = existingPostsOfFeedId.map(
-        (post) => post.title
-      );
-      // console.log(arrOfExistingPostsTitles);
-
-      // check for new posts
-      const arrOfNewPostsTitlesForAdding = getNewPostTitlesByComparison(
-        arrOfNewPostsTitles,
-        arrOfExistingPostsTitles
-      );
-      console.log(arrOfNewPostsTitlesForAdding);
-
-      if (arrOfNewPostsTitlesForAdding.length > 0) {
-        // filters the posts array to include only those posts whose titles are present in
-        // the newPostObjForAdding array
-        const newPostObjForAdding = parseRSSFeed(newResponseData).posts.filter(
-          (post) => arrOfNewPostsTitlesForAdding.includes(post.title)
-        );
-        console.log(newPostObjForAdding);
-
-        const updatedPostsObj = generateNewPostsObjOfFeed(
-          newPostObjForAdding,
-          feedIdOfFoundFeedObj
-        );
-        // console.log(updatedPostsObj);
-        watchedState.posts.push(updatedPostsObj);
-      }
-    })
-    .catch((err) => console.log(err));
-};
-
-const startRssChecking = (state, elements, watchedState) => {
-  const arrOfUpdatedPostsPromises = Promise.all(
-    state.form.arrOfValidUrls.map((url) =>
-      updateWatchedStateWithNewPosts(state, url, watchedState)
-    )
-  );
-
-  arrOfUpdatedPostsPromises.finally(
-    setTimeout(() => {
-      startRssChecking(state, elements, watchedState);
-    }, 5000)
-  );
-};
-
 const app = () => {
   const elements = {
     formEl: {
@@ -185,7 +100,7 @@ const app = () => {
     feeds: [],
     stateUi: {
       arrOfClickedPostLinks: [],
-      modalWinContent: null,
+      modalWindowContent: null,
     },
   };
 
@@ -194,6 +109,8 @@ const app = () => {
   });
 
   controlClickedPostLinks(watchedState, elements);
+
+  updateRssPostsWithTimer(watchedState);
 
   elements.formEl.form.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -236,10 +153,9 @@ const app = () => {
             // console.log(postsObjOfCurrentFeed);
 
             watchedState.feeds.push(feedObj);
-            console.log(Array.from(watchedState.feeds));
+            // console.log(watchedState.feeds);
             watchedState.posts.push(postsObjOfCurrentFeed);
-
-            startRssChecking(state, elements, watchedState);
+            // console.log(watchedState.posts);
           })
           .catch((error) => {
             watchedState.form.loadingProcess.processState =
