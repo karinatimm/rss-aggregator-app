@@ -2,15 +2,7 @@
 
 ### Progect description:
 
-The RSS Aggregator is a web application designed to aggregate and display RSS feeds from various sources. It allows users to add RSS feed URLs, fetch the latest posts from those feeds, and view them in a unified interface. The application provides features such as feed validation, error handling, and modal windows for viewing full post content. Enjoy! Feel free to explore the deployed application and provide any feedback or suggestions for improvement.
-
-Features
-RSS Feed Aggregation: Aggregate RSS feeds from multiple sources.
-User-Friendly Interface: Intuitive interface for easy navigation and consumption of RSS content.
-Error Handling: Handles errors gracefully, providing informative feedback to users.
-Responsive Design: The application is designed to be responsive and work seamlessly across different devices.
-Deployment
-This project has been deployed on Vercel and is accessible at the following URL: RSS Aggregator on Vercel
+The RSS Aggregator is a web application designed to aggregate and display RSS feeds from various sources. It allows users to add RSS feed URLs, fetch the latest posts from those feeds, and view them in a unified interface. The application provides features such as feed validation, error handling, and modal windows for viewing full post content. Feel free to explore the deployed application and provide any feedback or suggestions for improvement. Enjoy!
 
 ### Features
 
