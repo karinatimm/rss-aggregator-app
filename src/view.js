@@ -20,7 +20,6 @@ const renderFeedbacksAndErrors = (watchedState, i18nInstance, elements) => {
       addUrlBtn.removeAttribute('disabled');
       feedback.classList.add('text-success');
       feedback.textContent = i18nInstance.t('rssUploaded');
-      //   console.log(feedback);
       form.reset();
       formInput.focus();
       break;
@@ -39,8 +38,11 @@ const renderFeedbacksAndErrors = (watchedState, i18nInstance, elements) => {
       addUrlBtn.removeAttribute('disabled');
       formInput.classList.add('is-invalid');
       feedback.textContent = watchedState.form.validError;
-      //   console.log(feedback.textContent);
+
       feedback.classList.add('text-danger');
+      break;
+    }
+    default: {
       break;
     }
   }
@@ -68,34 +70,7 @@ const renderFeedAndPostCardContainer = (mainDivContainer, elements) => {
   ulList.classList.add('list-group', 'border-0', 'rounded-0');
   mainDivContainer.append(ulList);
 };
-// const renderFeeds = (watchedState, elements) => {
-//     const {
-//       feedsAndPostsEl: { feedsMainDivContainer },
-//     } = elements;
 
-//     const { feeds } = watchedState;
-
-//     if (!feedsMainDivContainer.querySelector("div")) {
-//       renderFeedAndPostCardContainer(feedsMainDivContainer, elements);
-//     }
-
-//     const lastAddedFeed = feeds.at(-1);
-
-//     const li = document.createElement("li");
-//     li.classList.add("list-group-item", "border-0", "border-end-0");
-
-//     const h3 = document.createElement("h3");
-//     h3.classList.add("h6", "m-0");
-//     h3.textContent = lastAddedFeed.title;
-
-//     const p = document.createElement("p");
-//     p.classList.add("m-0", "small", "text-black-50");
-//     p.textContent = lastAddedFeed.description;
-
-//     feedsMainDivContainer.querySelector("ul").prepend(li);
-//     li.append(h3);
-//     h3.append(p);
-//   };
 const renderFeeds = (watchedState, elements) => {
   const {
     feedsAndPostsEl: { feedsMainDivContainer },
@@ -107,9 +82,7 @@ const renderFeeds = (watchedState, elements) => {
     renderFeedAndPostCardContainer(feedsMainDivContainer, elements);
   }
 
-  // Clear existing posts before rendering new ones
   feedsMainDivContainer.querySelector('ul').innerHTML = '';
-  //   console.log(feeds);
 
   feeds.forEach((feedInRss) => {
     const li = document.createElement('li');
@@ -141,17 +114,11 @@ export const renderPosts = (watchedState, elements) => {
     renderFeedAndPostCardContainer(postsMainDivContainer, elements);
   }
 
-  // Clear existing posts before rendering new ones
-  // By clearing the HTML content of the <ul> element, you ensure that only the latest
-  // posts are displayed, avoiding duplication or mixing of old and new posts
   postsMainDivContainer.querySelector('ul').innerHTML = '';
 
-  const arrOfFlattenPosts = posts.flat(); // Flatten the array of posts
-  //   console.log(posts);
-  //   console.log(arrOfFlattenPosts);
+  const arrOfFlattenPosts = posts.flat();
 
   arrOfFlattenPosts.forEach((postInRss) => {
-    // create li element
     const li = document.createElement('li');
     li.classList.add(
       'list-group-item',
@@ -162,7 +129,6 @@ export const renderPosts = (watchedState, elements) => {
       'border-end-0',
     );
 
-    // create href a
     const aHref = document.createElement('a');
     aHref.setAttribute('href', `${postInRss.link}`);
     aHref.setAttribute('class', 'fw-bold');
@@ -178,8 +144,6 @@ export const renderPosts = (watchedState, elements) => {
     watchPostBtn.setAttribute('type', 'button');
     watchPostBtn.classList.add('btn', 'btn-outline-primary', 'btn-sm');
     watchPostBtn.setAttribute('data-id', `${postInRss.postId}`);
-    // clicking the button will automatically trigger the modal window with
-    // the ID specified in the data-bs-target attribute.
     watchPostBtn.setAttribute('data-bs-toggle', 'modal');
     watchPostBtn.setAttribute('data-bs-target', '#modal');
     watchPostBtn.textContent = elements.feedsAndPostsEl.watchBtn;
@@ -196,15 +160,10 @@ const renderClickedPostLinks = (watchedState, elements) => {
     stateUi: { arrOfClickedPostLinks },
   } = watchedState;
 
-  // It selects all <a> elements within the postsMainDivContainer using querySelectorAll
   postsMainDivContainer.querySelectorAll('a').forEach((aEl) => {
-    // For each <a> element, it extracts the value of the href attribute, which
-    // represents the link of the post
     const postLink = aEl.getAttribute('href');
-    // It checks if the extracted post link is present in the arrOfClickedPostLinks
-    // array, indicating that the post has been clicked.
     const isPostClicked = arrOfClickedPostLinks.includes(postLink);
-    // If the post has been clicked (isPostClicked is true), it updates the class list of the <a>
+
     if (isPostClicked) {
       aEl.classList.remove('fw-bold');
       aEl.classList.add('fw-normal', 'link-secondary');
@@ -223,6 +182,7 @@ const renderModalWindow = (watchedState, elements) => {
 
   if (modalWindowContent.post) {
     const { title, description, link } = modalWindowContent.post;
+    console.log(modalWindowContent.post);
 
     // Update modal content
     modalTitle.textContent = title;
@@ -253,6 +213,8 @@ export const renderUIView = (watchedState, i18nInstance, elements) => (pathToEl)
       break;
     case 'stateUi.modalWindowContent':
       renderModalWindow(watchedState, elements);
+      break;
+    default:
       break;
   }
 };

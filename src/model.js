@@ -1,5 +1,3 @@
-// it is used to create an object with keys taken from the path property of each error
-// in the Yup validation error
 import onChange from 'on-change';
 import * as yup from 'yup';
 import i18next from 'i18next';
@@ -9,6 +7,7 @@ import { renderUIView } from './view.js';
 import ru from './locales/ru.js';
 import en from './locales/en.js';
 import {
+  validateInputValue,
   parseRSSFeed,
   generateAxiosGetRequestUrl,
   generateNewFeedObj,
@@ -38,19 +37,6 @@ yup.setLocale({
   },
 });
 
-const createValidationSchema = (state) => yup
-  .string()
-  .trim()
-  .required()
-  .url()
-  .notOneOf(state.form.arrOfValidUrls);
-
-// validateInputValue function is asynchronous because it relies on the asynchronous
-// capabilities of the yup library for validation
-const validateInputValue = (state, url) => {
-  const validationSchema = createValidationSchema(state);
-  return validationSchema.validate(url);
-};
 const app = () => {
   const elements = {
     formEl: {
@@ -92,13 +78,12 @@ const app = () => {
       },
       validError: null,
       arrOfValidUrls: [],
-      // feedbackMessage: "",
     },
     posts: [],
     feeds: [],
     stateUi: {
       arrOfClickedPostLinks: [],
-      modalWindowContent: {},
+      modalWindowContent: null,
     },
   };
 
@@ -106,53 +91,40 @@ const app = () => {
     renderUIView(state, i18nInstance, elements)(pathToEl);
   });
 
-  controlClickedPostLinks(watchedState, elements);
-  controlModalWindow(watchedState, elements);
-
   elements.formEl.form.addEventListener('submit', (e) => {
     e.preventDefault();
-    // an input element with the name or id attribute set to "url" within the form
+
     const inputUrlByUser = e.target.url.value;
-    // console.log(inputUrlByUser);
     watchedState.form.loadingProcess.processState = 'formFilling';
-    validateInputValue(watchedState, inputUrlByUser) // promise is pending
-      // receives the validUserUrl as the resolved value (resolved proise)
+
+    validateInputValue(watchedState, inputUrlByUser)
       .then((validUserUrl) => {
         watchedState.form.loadingProcess.processState = 'completed';
-        // promise is resolved (fulfilled)
-        // Validation successful
         watchedState.form.processError = null;
         watchedState.form.arrOfValidUrls.push(inputUrlByUser);
-        // console.log(Array.from(watchedState.form.arrOfValidUrls));
         watchedState.form.loadingProcess.processState = 'processingRequest';
         axios
-          .get(generateAxiosGetRequestUrl(validUserUrl)) // promise is pending
+          .get(generateAxiosGetRequestUrl(validUserUrl))
           .then((responseData) => {
             watchedState.form.loadingProcess.processState = 'completed';
-            // console.log(responseData); // {data: {…}, status: 200, statusText: '', headers: AxiosHeaders, config: {…}, …}
 
-            // generate unique ID for each feed
             const uniqueFeedId = _.uniqueId();
             const parsedResponseData = parseRSSFeed(responseData);
-            // console.log(parsedResponseData);
 
             const feedObj = generateNewFeedObj(
               parsedResponseData,
               uniqueFeedId,
               validUserUrl,
             );
-            // console.log(feedObj);
 
             const postsObjOfCurrentFeed = generateNewPostsObjOfFeed(
               parsedResponseData,
               uniqueFeedId,
             );
-            // console.log(postsObjOfCurrentFeed);
 
             watchedState.feeds.push(feedObj);
-            // console.log(watchedState.feeds);
             watchedState.posts.push(postsObjOfCurrentFeed);
-            // console.log(watchedState.posts[0]);
+
             updateExistingRssPostsWithTimer(watchedState);
           })
           .catch((error) => {
@@ -163,7 +135,7 @@ const app = () => {
             ) {
               watchedState.form.loadingProcess.processError = i18nInstance.t('errors.noValidRss');
             }
-            // The navigator.onLine check if the browser has internet access
+
             if (!navigator.onLine) {
               watchedState.form.loadingProcess.processError = i18nInstance.t(
                 'errors.errorNetwork',
@@ -172,12 +144,13 @@ const app = () => {
           });
       })
       .catch((error) => {
-        // Validation failed
         watchedState.form.loadingProcess.processState = 'validationError';
-        watchedState.form.validError = i18nInstance.t(error.message.key); // error.message
-        // console.log(error.message.key);
+        watchedState.form.validError = i18nInstance.t(error.message.key);
       });
   });
+
+  controlClickedPostLinks(watchedState, elements);
+  controlModalWindow(watchedState, elements);
 };
 
 export default app;
