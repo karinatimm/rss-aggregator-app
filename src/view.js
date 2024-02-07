@@ -29,9 +29,7 @@ const renderFeedbacksAndErrors = (watchedState, i18nInstance, elements) => {
       formInput.classList.add('is-invalid');
       feedback.classList.add('text-danger');
 
-      feedback.textContent = navigator.onLine
-        ? watchedState.form.loadingProcess.processError
-        : watchedState.form.loadingProcess.processError;
+      feedback.textContent = watchedState.form.loadingProcess.processError;
       break;
     }
     case 'validationError': {

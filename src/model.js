@@ -129,14 +129,9 @@ const app = () => {
           })
           .catch((error) => {
             watchedState.form.loadingProcess.processState = 'responseAndNetworkError';
-            if (
-              error.message
-              === 'Parsing error: The XML document is not well-formed'
-            ) {
+            if (error.message === 'The XML document is not well-formed') {
               watchedState.form.loadingProcess.processError = i18nInstance.t('errors.noValidRss');
-            }
-
-            if (!navigator.onLine) {
+            } else {
               watchedState.form.loadingProcess.processError = i18nInstance.t(
                 'errors.errorNetwork',
               );

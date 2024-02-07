@@ -65,13 +65,13 @@ export const generateNewFeedObj = (
 
 export const generateNewPostsObjOfFeed = (parsedResponseData, uniqueFeedId) => {
   const { posts } = parsedResponseData;
-  posts.forEach((post) => {
-    post.feedId = uniqueFeedId;
+  const newPosts = posts.map((post) => ({
+    ...post,
+    feedId: uniqueFeedId,
+    postId: _.uniqueId(),
+  }));
 
-    post.postId = _.uniqueId();
-  });
-
-  return posts;
+  return newPosts;
 };
 
 export const updateExistingRssPostsWithTimer = (watchedState) => {
