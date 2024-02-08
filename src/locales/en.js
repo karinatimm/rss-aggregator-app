@@ -6,7 +6,7 @@ export default {
     placeholder: 'link RSS',
     urlExample: 'Exapmle: https://ru.hexlet.io/lessons.rss',
     rssUploaded: 'RSS uploaded successfully',
-    // rssIsLoading: 'RSS is loading',
+    rssIsLoading: 'RSS is loading',
     feedCardTitle: 'Фиды',
     postCardTitle: 'Посты',
     authorContainer: 'created by',
