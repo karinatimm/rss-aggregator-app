@@ -1,43 +1,53 @@
-const renderFeedbacksAndErrors = (watchedState, i18nInstance, elements) => {
-  const {
-    formEl: {
-      formInput, feedback, addUrlBtn, form,
-    },
-  } = elements;
-
+const resetFeedbackStyles = (feedback, formInput, addUrlBtn) => {
   feedback.classList.remove('text-danger', 'text-success', 'rss-uploading');
   formInput.classList.remove('is-invalid');
   addUrlBtn.removeAttribute('disabled');
+};
+
+const processingRequestFeedbackStyles = (addUrlBtn, feedback) => {
+  addUrlBtn.setAttribute('disabled', '');
+  feedback.classList.add('rss-uploading');
+};
+
+const completedFeedbackStyles = (formInput, feedback, addUrlBtn, form) => {
+  addUrlBtn.removeAttribute('disabled');
+  feedback.classList.add('text-success');
+  form.reset();
+  formInput.focus();
+};
+
+const errorFeedbackStyles = (addUrlBtn, formInput, feedback) => {
+  addUrlBtn.removeAttribute('disabled');
+  formInput.classList.add('is-invalid');
+  feedback.classList.add('text-danger');
+};
+
+const renderFeedbacksAndErrors = (watchedState, i18nInstance, elements) => {
+  const {
+    formInput, feedback, addUrlBtn, form,
+  } = elements.formEl;
+
+  resetFeedbackStyles(feedback, formInput, addUrlBtn);
 
   switch (watchedState.form.loadingProcess.processState) {
     case 'processingRequest': {
-      addUrlBtn.setAttribute('disabled', '');
       feedback.textContent = i18nInstance.t('rssIsLoading');
-      feedback.classList.add('rss-uploading');
+      processingRequestFeedbackStyles(addUrlBtn, feedback);
       break;
     }
     case 'completed': {
-      addUrlBtn.removeAttribute('disabled');
-      feedback.classList.add('text-success');
       feedback.textContent = i18nInstance.t('rssUploaded');
-      form.reset();
-      formInput.focus();
+      completedFeedbackStyles(formInput, feedback, addUrlBtn, form);
       break;
     }
     case 'responseAndNetworkError': {
-      addUrlBtn.removeAttribute('disabled');
-      formInput.classList.add('is-invalid');
-      feedback.classList.add('text-danger');
-
       feedback.textContent = watchedState.form.loadingProcess.processError;
+      errorFeedbackStyles(addUrlBtn, formInput, feedback);
       break;
     }
     case 'validationError': {
-      addUrlBtn.removeAttribute('disabled');
-      formInput.classList.add('is-invalid');
       feedback.textContent = watchedState.form.validError;
-
-      feedback.classList.add('text-danger');
+      errorFeedbackStyles(addUrlBtn, formInput, feedback);
       break;
     }
     default: {
@@ -70,16 +80,12 @@ const renderFeedAndPostCardContainer = (mainDivContainer, elements) => {
 };
 
 const renderFeeds = (watchedState, elements) => {
-  const {
-    feedsAndPostsEl: { feedsMainDivContainer },
-  } = elements;
-
+  const { feedsMainDivContainer } = elements.feedsAndPostsEl;
   const { feeds } = watchedState;
 
   if (!feedsMainDivContainer.querySelector('div')) {
     renderFeedAndPostCardContainer(feedsMainDivContainer, elements);
   }
-
   feedsMainDivContainer.querySelector('ul').innerHTML = '';
 
   feeds.forEach((feedInRss) => {
@@ -100,13 +106,43 @@ const renderFeeds = (watchedState, elements) => {
   });
 };
 
-export const renderPosts = (watchedState, elements) => {
-  const {
-    feedsAndPostsEl: { postsMainDivContainer },
-  } = elements;
+const createPostListItem = (post, elements) => {
+  const li = document.createElement('li');
+  li.classList.add(
+    'list-group-item',
+    'd-flex',
+    'justify-content-between',
+    'align-items-start',
+    'border-0',
+    'border-end-0',
+  );
 
+  const aHref = document.createElement('a');
+  aHref.setAttribute('href', `${post.link}`);
+  aHref.setAttribute('class', 'fw-bold');
+  aHref.setAttribute('target', '_blank');
+  aHref.setAttribute('data-id', `${post.postId}`);
+  aHref.setAttribute('rel', 'noopener noreferrer');
+  aHref.textContent = post.title;
+
+  li.append(aHref);
+
+  const watchPostBtn = document.createElement('button');
+  watchPostBtn.setAttribute('type', 'button');
+  watchPostBtn.classList.add('btn', 'btn-outline-primary', 'btn-sm');
+  watchPostBtn.setAttribute('data-id', `${post.postId}`);
+  watchPostBtn.setAttribute('data-bs-toggle', 'modal');
+  watchPostBtn.setAttribute('data-bs-target', '#modal');
+  watchPostBtn.textContent = elements.feedsAndPostsEl.watchBtn;
+
+  li.append(watchPostBtn);
+
+  return li;
+};
+
+export const renderPosts = (watchedState, elements) => {
+  const { postsMainDivContainer } = elements.feedsAndPostsEl;
   const { posts } = watchedState;
-  //   console.log(posts);
 
   if (!postsMainDivContainer.querySelector('div')) {
     renderFeedAndPostCardContainer(postsMainDivContainer, elements);
@@ -117,46 +153,14 @@ export const renderPosts = (watchedState, elements) => {
   const arrOfFlattenPosts = posts.flat();
 
   arrOfFlattenPosts.forEach((postInRss) => {
-    const li = document.createElement('li');
-    li.classList.add(
-      'list-group-item',
-      'd-flex',
-      'justify-content-between',
-      'align-items-start',
-      'border-0',
-      'border-end-0',
-    );
-
-    const aHref = document.createElement('a');
-    aHref.setAttribute('href', `${postInRss.link}`);
-    aHref.setAttribute('class', 'fw-bold');
-    aHref.setAttribute('target', '_blank');
-    aHref.setAttribute('data-id', `${postInRss.postId}`);
-    aHref.setAttribute('rel', 'noopener noreferrer');
-    aHref.textContent = postInRss.title;
-
-    li.append(aHref);
-    postsMainDivContainer.querySelector('ul').prepend(li);
-
-    const watchPostBtn = document.createElement('button');
-    watchPostBtn.setAttribute('type', 'button');
-    watchPostBtn.classList.add('btn', 'btn-outline-primary', 'btn-sm');
-    watchPostBtn.setAttribute('data-id', `${postInRss.postId}`);
-    watchPostBtn.setAttribute('data-bs-toggle', 'modal');
-    watchPostBtn.setAttribute('data-bs-target', '#modal');
-    watchPostBtn.textContent = elements.feedsAndPostsEl.watchBtn;
-
-    li.append(watchPostBtn);
+    const postListItem = createPostListItem(postInRss, elements);
+    postsMainDivContainer.querySelector('ul').prepend(postListItem);
   });
 };
 
 const renderClickedPostLinks = (watchedState, elements) => {
-  const {
-    feedsAndPostsEl: { postsMainDivContainer },
-  } = elements;
-  const {
-    stateUi: { arrOfClickedPostLinks },
-  } = watchedState;
+  const { postsMainDivContainer } = elements.feedsAndPostsEl;
+  const { arrOfClickedPostLinks } = watchedState.stateUi;
 
   postsMainDivContainer.querySelectorAll('a').forEach((aEl) => {
     const postLink = aEl.getAttribute('href');
@@ -170,19 +174,12 @@ const renderClickedPostLinks = (watchedState, elements) => {
 };
 
 const renderModalWindow = (watchedState, elements) => {
-  const {
-    stateUi: { modalWindowContent },
-  } = watchedState;
+  const { post } = watchedState.stateUi.modalWindowContent;
+  const { modalTitle, modalDescription, modalReadBtn } = elements.modalWindowEl;
 
-  const {
-    modalWindowEl: { modalTitle, modalDescription, modalReadBtn },
-  } = elements;
+  if (post) {
+    const { title, description, link } = post;
 
-  if (modalWindowContent.post) {
-    const { title, description, link } = modalWindowContent.post;
-    console.log(modalWindowContent.post);
-
-    // Update modal content
     modalTitle.textContent = title;
     modalDescription.textContent = description;
     modalReadBtn.setAttribute('href', link);
