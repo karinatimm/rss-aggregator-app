@@ -1,6 +1,7 @@
 import axios from 'axios';
 import * as yup from 'yup';
 import _ from 'lodash';
+import TIMEOUT_SEC from './config.js';
 
 export const createValidationSchema = (state) => yup.string().trim().required().url()
   .notOneOf(state.form.arrOfValidUrls);
@@ -102,7 +103,9 @@ export const updateExistingRssPostsWithTimer = (watchedState) => {
       console.log(`Parsing error: ${error.message}`);
     })
     .finally(() => {
-      const time = 5000;
-      setTimeout(() => updateExistingRssPostsWithTimer(watchedState), time);
+      setTimeout(
+        () => updateExistingRssPostsWithTimer(watchedState),
+        TIMEOUT_SEC,
+      );
     });
 };
