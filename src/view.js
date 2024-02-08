@@ -125,8 +125,6 @@ const createPostListItem = (post, elements) => {
   aHref.setAttribute('rel', 'noopener noreferrer');
   aHref.textContent = post.title;
 
-  li.append(aHref);
-
   const watchPostBtn = document.createElement('button');
   watchPostBtn.setAttribute('type', 'button');
   watchPostBtn.classList.add('btn', 'btn-outline-primary', 'btn-sm');
@@ -135,7 +133,7 @@ const createPostListItem = (post, elements) => {
   watchPostBtn.setAttribute('data-bs-target', '#modal');
   watchPostBtn.textContent = elements.feedsAndPostsEl.watchBtn;
 
-  li.append(watchPostBtn);
+  li.append(aHref, watchPostBtn);
 
   return li;
 };
