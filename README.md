@@ -32,10 +32,3 @@ This project has been deployed on Vercel and is accessible at the following URL:
 ### CodeClimate badge in order to display this project's quality:
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/5008988e470b6d860762/maintainability)](https://codeclimate.com/github/karinatimm/frontend-project-11/maintainability)
-
-## System Requirements if one wants to run the RSS Aggregator project locally:
-
-To run the RSS Aggregator project locally, ensure you have the following software installed on your system:
-
-- Node.js(version 20.3.0 LTS or higher) **(https://nodejs.org/)**
-- Node Package Manager(npm) **(https://www.npmjs.com/)**
