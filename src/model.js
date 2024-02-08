@@ -11,6 +11,8 @@ import {
   controlValidationAndAxiosRequest,
 } from './controller.js';
 
+import { updateExistingRssPostsWithTimer } from './helpers.js';
+
 const initializeElements = (i18nInstance) => {
   const formEl = {
     formInput: document.querySelector('#url-input'),
@@ -99,7 +101,7 @@ const initializeApp = () => {
   const watchedState = onChange(state, (pathToEl) => {
     renderUIView(state, i18nInstance, elements)(pathToEl);
   });
-
+  updateExistingRssPostsWithTimer(watchedState);
   controlValidationAndAxiosRequest(watchedState, elements, i18nInstance);
   controlClickedPostLinks(watchedState, elements);
   controlModalWindow(watchedState, elements);
