@@ -1,19 +1,111 @@
+import axios from 'axios';
+import _ from 'lodash';
+import {
+  validateInputValue,
+  parseRSSFeed,
+  generateAxiosGetRequestUrl,
+  generateNewFeedObj,
+  generateNewPostsObjOfFeed,
+  updateExistingRssPostsWithTimer,
+} from './helpers.js';
+
+const handleValidationError = (state, i18nInstance, error) => {
+  const copyState = { ...state };
+  copyState.form.loadingProcess.processState = 'validationError';
+  copyState.form.validError = i18nInstance.t(error.message.key);
+  return copyState;
+};
+
+const handleResponseAndNetworkError = (state, i18nInstance, error) => {
+  const copyState = { ...state };
+  copyState.form.loadingProcess.processState = 'responseAndNetworkError';
+  if (error.message === 'The XML document is not well-formed') {
+    copyState.form.loadingProcess.processError = i18nInstance.t('errors.noValidRss');
+  } else {
+    copyState.form.loadingProcess.processError = i18nInstance.t(
+      'errors.errorNetwork',
+    );
+  }
+  return copyState;
+};
+
+export const controlValidationAndAxiosRequest = (
+  watchedState,
+  elements,
+  i18nInstance,
+) => {
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+
+    const inputUrlByUser = e.target.url.value;
+    const newState = { ...watchedState };
+    newState.form.loadingProcess.processState = 'formFilling';
+
+    validateInputValue(newState, inputUrlByUser)
+      .then((validUserUrl) => {
+        newState.form.loadingProcess.processState = 'completed';
+        newState.form.processError = null;
+        newState.form.arrOfValidUrls.push(inputUrlByUser);
+        newState.form.loadingProcess.processState = 'processingRequest';
+        axios
+          .get(generateAxiosGetRequestUrl(validUserUrl))
+          .then((responseData) => {
+            newState.form.loadingProcess.processState = 'completed';
+
+            const uniqueFeedId = _.uniqueId();
+            const parsedResponseData = parseRSSFeed(responseData);
+
+            const feedObj = generateNewFeedObj(
+              parsedResponseData,
+              uniqueFeedId,
+              validUserUrl,
+            );
+
+            const postsObjOfCurrentFeed = generateNewPostsObjOfFeed(
+              parsedResponseData,
+              uniqueFeedId,
+            );
+
+            newState.feeds.push(feedObj);
+            newState.posts.push(postsObjOfCurrentFeed);
+
+            updateExistingRssPostsWithTimer(newState);
+          })
+          .catch((error) => {
+            const errorState = handleResponseAndNetworkError(
+              newState,
+              i18nInstance,
+              error,
+            );
+
+            Object.assign(watchedState, errorState);
+          });
+      })
+      .catch((error) => {
+        const errorState = handleValidationError(newState, i18nInstance, error);
+
+        Object.assign(watchedState, errorState);
+      });
+  };
+
+  elements.formEl.form.addEventListener('submit', handleFormSubmit);
+};
+
 export const controlClickedPostLinks = (watchedState, elements) => {
-  const {
-    feedsAndPostsEl: { postsMainDivContainer },
-  } = elements;
-  const {
-    stateUi: { arrOfClickedPostLinks },
-  } = watchedState;
+  const { postsMainDivContainer } = elements.feedsAndPostsEl;
+  const { arrOfClickedPostLinks } = watchedState.stateUi;
 
   const handleViewedPost = (e) => {
     const clickedElement = e.target;
 
     if (clickedElement.tagName === 'A') {
-      const clikedPostLink = clickedElement.getAttribute('href');
+      const clickedPostLink = clickedElement.getAttribute('href');
 
-      if (!arrOfClickedPostLinks.includes(clikedPostLink)) {
-        arrOfClickedPostLinks.push(clikedPostLink);
+      if (!arrOfClickedPostLinks.includes(clickedPostLink)) {
+        const copyState = { ...watchedState };
+        copyState.stateUi.arrOfClickedPostLinks.push(clickedPostLink);
+
+        Object.assign(watchedState, copyState);
       }
     }
   };
@@ -22,35 +114,27 @@ export const controlClickedPostLinks = (watchedState, elements) => {
 };
 
 export const controlModalWindow = (watchedState, elements) => {
-  const {
-    modalWindowEl: { modalWindow },
-  } = elements;
+  const { modalWindow } = elements.modalWindowEl;
   const { posts } = watchedState;
-
-  const {
-    stateUi: { arrOfClickedPostLinks },
-  } = watchedState;
+  const { arrOfClickedPostLinks } = watchedState.stateUi;
 
   const handleModalWindow = (e) => {
     const closestPostLiItem = e.relatedTarget.parentElement;
 
-    if (closestPostLiItem) {
-      const aElement = closestPostLiItem.querySelector('a');
+    const aElement = closestPostLiItem.querySelector('a');
 
-      if (aElement) {
-        const href = aElement.getAttribute('href');
-        const arrOfFlattenPosts = posts.flat();
-        const post = arrOfFlattenPosts.find(
-          (postInarr) => postInarr.link === href,
-        );
+    const href = aElement.getAttribute('href');
+    const arrOfFlattenPosts = posts.flat();
+    const post = arrOfFlattenPosts.find((postInarr) => postInarr.link === href);
 
-        watchedState.stateUi.modalWindowContent = { post };
+    const copyState = { ...watchedState };
+    copyState.stateUi.modalWindowContent = { post };
 
-        if (!arrOfClickedPostLinks.includes(href)) {
-          arrOfClickedPostLinks.push(href);
-        }
-      }
+    if (!arrOfClickedPostLinks.includes(href)) {
+      arrOfClickedPostLinks.push(href);
     }
+
+    Object.assign(watchedState, copyState);
   };
 
   modalWindow.addEventListener('show.bs.modal', handleModalWindow);
