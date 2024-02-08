@@ -1,5 +1,5 @@
 import onChange from 'on-change';
-import * as yup from 'yup';
+// import * as yup from 'yup';
 import i18next from 'i18next';
 // import _ from 'lodash';
 import { renderUIView } from './view.js';
@@ -11,7 +11,7 @@ import {
   controlValidationAndAxiosRequest,
 } from './controller.js';
 
-import { updateExistingRssPostsWithTimer } from './helpers.js';
+import { updateExistingRssPostsWithTimer, initializeYup } from './helpers.js';
 
 const initializeElements = (i18nInstance) => {
   const formEl = {
@@ -58,17 +58,6 @@ const initializeI18n = () => {
     },
   });
   return i18nInstance;
-};
-
-const initializeYup = () => {
-  yup.setLocale({
-    mixed: {
-      notOneOf: () => ({ key: 'errors.rssAlreadyExists' }),
-    },
-    string: {
-      url: () => ({ key: 'errors.invalidUrl' }),
-    },
-  });
 };
 
 const initializeState = () => {
