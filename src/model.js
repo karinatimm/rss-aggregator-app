@@ -12,35 +12,33 @@ import {
 } from './controller.js';
 
 const initializeElements = (i18nInstance) => {
-  const formEl = {
-    formInput: document.querySelector('#url-input'),
-    form: document.querySelector('.rss-form'),
-    addUrlBtn: document.querySelector('.btn-lg'),
-    feedback: document.querySelector('.feedback'),
-    formTitle: document.querySelector('.display-3'),
-    formSubtitle: document.querySelector('.lead'),
-    placeholder: document.querySelector('[for="url-input"]'),
-    urlExample: document.querySelector('.example'),
+  const elements = {
+    formEl: {
+      formInput: document.querySelector('#url-input'),
+      form: document.querySelector('.rss-form'),
+      addUrlBtn: document.querySelector('.btn-lg'),
+      feedback: document.querySelector('.feedback'),
+      formTitle: document.querySelector('.display-3'),
+      formSubtitle: document.querySelector('.lead'),
+      placeholder: document.querySelector('[for="url-input"]'),
+      urlExample: document.querySelector('.example'),
+    },
+    modalWindowEl: {
+      modalWindow: document.querySelector('.modal'),
+      modalTitle: document.querySelector('.modal-title'),
+      modalDescription: document.querySelector('.modal-body'),
+      modalReadBtn: document.querySelector('.btn-primary.full-article'),
+      modalCloseBtn: document.querySelector('.btn-secondary'),
+    },
+
+    feedsAndPostsEl: {
+      feedsMainDivContainer: document.querySelector('.feeds'),
+      postsMainDivContainer: document.querySelector('.posts'),
+      h2FeedCardTitle: i18nInstance.t('feedCardTitle'),
+      h2PostCardTitle: i18nInstance.t('postCardTitle'),
+      watchBtn: i18nInstance.t('buttons.watchPostBtn'),
+    },
   };
-
-  const modalWindowEl = {
-    modalWindow: document.querySelector('.modal'),
-    modalTitle: document.querySelector('.modal-title'),
-    modalDescription: document.querySelector('.modal-body'),
-    modalReadBtn: document.querySelector('.btn-primary.full-article'),
-    modalCloseBtn: document.querySelector('.btn-secondary'),
-  };
-
-  const feedsAndPostsEl = {
-    feedsMainDivContainer: document.querySelector('.feeds'),
-    postsMainDivContainer: document.querySelector('.posts'),
-    h2FeedCardTitle: i18nInstance.t('feedCardTitle'),
-    h2PostCardTitle: i18nInstance.t('postCardTitle'),
-    watchBtn: i18nInstance.t('buttons.watchPostBtn'),
-  };
-
-  const elements = { formEl, modalWindowEl, feedsAndPostsEl };
-
   return elements;
 };
 
