@@ -1,12 +1,65 @@
+// const resetFeedbackStyles = (feedback, formInput, addUrlBtn) => {
+//   feedback.classList.remove('text-danger', 'text-success', 'rss-uploading');
+//   formInput.classList.remove('is-invalid');
+//   addUrlBtn.removeAttribute('disabled');
+// };
+
+// const processingRequestFeedbackStyles = (addUrlBtn, feedback) => {
+//   addUrlBtn.setAttribute('disabled', '');
+//   feedback.classList.add('rss-uploading');
+// };
+
+// const completedFeedbackStyles = (formInput, feedback, addUrlBtn, form) => {
+//   addUrlBtn.removeAttribute('disabled');
+//   feedback.classList.add('text-success');
+//   form.reset();
+//   formInput.focus();
+// };
+
+// const errorFeedbackStyles = (addUrlBtn, formInput, feedback) => {
+//   addUrlBtn.removeAttribute('disabled');
+//   formInput.classList.add('is-invalid');
+//   feedback.classList.add('text-danger');
+// };
+
+// const renderFeedbacksAndErrors = (watchedState, i18nInstance, elements) => {
+//   const {
+//     formInput, feedback, addUrlBtn, form,
+//   } = elements.formEl;
+
+//   resetFeedbackStyles(feedback, formInput, addUrlBtn);
+
+//   switch (watchedState.form.loadingProcess.processState) {
+//     case 'processingRequest': {
+//       feedback.textContent = i18nInstance.t('rssIsLoading');
+//       processingRequestFeedbackStyles(addUrlBtn, feedback);
+//       break;
+//     }
+//     case 'completed': {
+//       feedback.textContent = i18nInstance.t('rssUploaded');
+//       completedFeedbackStyles(formInput, feedback, addUrlBtn, form);
+//       break;
+//     }
+//     case 'responseAndNetworkError': {
+//       feedback.textContent = watchedState.form.loadingProcess.processError;
+//       errorFeedbackStyles(addUrlBtn, formInput, feedback);
+//       break;
+//     }
+//     case 'validationError': {
+//       feedback.textContent = watchedState.form.validError;
+//       errorFeedbackStyles(addUrlBtn, formInput, feedback);
+//       break;
+//     }
+//     default: {
+//       break;
+//     }
+//   }
+// };
+
 const resetFeedbackStyles = (feedback, formInput, addUrlBtn) => {
-  feedback.classList.remove('text-danger', 'text-success', 'rss-uploading');
+  feedback.classList.remove('text-danger', 'text-success');
   formInput.classList.remove('is-invalid');
   addUrlBtn.removeAttribute('disabled');
-};
-
-const processingRequestFeedbackStyles = (addUrlBtn, feedback) => {
-  addUrlBtn.setAttribute('disabled', '');
-  feedback.classList.add('rss-uploading');
 };
 
 const completedFeedbackStyles = (formInput, feedback, addUrlBtn, form) => {
@@ -30,9 +83,8 @@ const renderFeedbacksAndErrors = (watchedState, i18nInstance, elements) => {
   resetFeedbackStyles(feedback, formInput, addUrlBtn);
 
   switch (watchedState.form.loadingProcess.processState) {
-    case 'processingRequest': {
-      feedback.textContent = i18nInstance.t('rssIsLoading');
-      processingRequestFeedbackStyles(addUrlBtn, feedback);
+    case 'formFilling': {
+      feedback.textContent = i18nInstance.t('');
       break;
     }
     case 'completed': {
