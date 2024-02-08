@@ -29,68 +29,6 @@ const handleResponseAndNetworkError = (state, i18nInstance, error) => {
   return copyState;
 };
 
-// export const controlValidationAndAxiosRequest = (
-//   watchedState,
-//   elements,
-//   i18nInstance,
-// ) => {
-//   const handleFormSubmit = (e) => {
-//     e.preventDefault();
-
-//     const inputUrlByUser = e.target.url.value;
-//     const newState = { ...watchedState };
-//     newState.form.loadingProcess.processState = 'formFilling';
-
-//     validateInputValue(newState, inputUrlByUser)
-//       .then((validUserUrl) => {
-//         newState.form.loadingProcess.processState = 'completed';
-//         newState.form.processError = null;
-//         newState.form.arrOfValidUrls.push(inputUrlByUser);
-//         newState.form.loadingProcess.processState = 'processingRequest';
-//         axios
-//           .get(generateAxiosGetRequestUrl(validUserUrl))
-//           .then((responseData) => {
-//             newState.form.loadingProcess.processState = 'completed';
-
-//             const uniqueFeedId = _.uniqueId();
-//             const parsedResponseData = parseRSSFeed(responseData);
-
-//             const feedObj = generateNewFeedObj(
-//               parsedResponseData,
-//               uniqueFeedId,
-//               validUserUrl,
-//             );
-
-//             const postsObjOfCurrentFeed = generateNewPostsObjOfFeed(
-//               parsedResponseData,
-//               uniqueFeedId,
-//             );
-
-//             newState.feeds.push(feedObj);
-//             newState.posts.push(postsObjOfCurrentFeed);
-
-//             // updateExistingRssPostsWithTimer(newState);
-//           })
-//           .catch((error) => {
-//             const errorState = handleResponseAndNetworkError(
-//               newState,
-//               i18nInstance,
-//               error,
-//             );
-
-//             Object.assign(watchedState, errorState);
-//           });
-//       })
-//       .catch((error) => {
-//         const errorState = handleValidationError(newState, i18nInstance, error);
-
-//         Object.assign(watchedState, errorState);
-//       });
-//   };
-
-//   elements.formEl.form.addEventListener('submit', handleFormSubmit);
-// };
-
 export const controlValidationAndAxiosRequest = (
   watchedState,
   elements,
@@ -108,14 +46,15 @@ export const controlValidationAndAxiosRequest = (
         newState.form.loadingProcess.processState = 'completed';
         newState.form.processError = null;
         newState.form.arrOfValidUrls.push(inputUrlByUser);
-        // newState.form.loadingProcess.processState = "processingRequest";
-        newState.form.loadingProcess.processState = 'formFilling';
+        newState.form.loadingProcess.processState = 'processingRequest';
         axios
           .get(generateAxiosGetRequestUrl(validUserUrl))
           .then((responseData) => {
+            newState.form.loadingProcess.processState = 'completed';
+
             const uniqueFeedId = _.uniqueId();
             const parsedResponseData = parseRSSFeed(responseData);
-            newState.form.loadingProcess.processState = 'completed';
+
             const feedObj = generateNewFeedObj(
               parsedResponseData,
               uniqueFeedId,
