@@ -3,6 +3,16 @@ import * as yup from 'yup';
 import _ from 'lodash';
 import TIMEOUT_SEC from './config.js';
 
+export const initializeYup = () => {
+  yup.setLocale({
+    mixed: {
+      notOneOf: () => ({ key: 'errors.rssAlreadyExists' }),
+    },
+    string: {
+      url: () => ({ key: 'errors.invalidUrl' }),
+    },
+  });
+};
 export const createValidationSchema = (state) => yup.string().trim().required().url()
   .notOneOf(state.form.arrOfValidUrls);
 
