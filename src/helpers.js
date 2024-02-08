@@ -76,36 +76,23 @@ export const generateNewPostsObjOfFeed = (parsedResponseData, uniqueFeedId) => {
 };
 
 export const updateExistingRssPostsWithTimer = (watchedState) => {
-  const arrOfAxiosRequests = watchedState.feeds.map(({ url }) => {
-    const existingFeedUrl = generateAxiosGetRequestUrl(url);
-    return axios.get(existingFeedUrl);
-  });
-
-  Promise.all(arrOfAxiosRequests)
+  const arrOfReq = watchedState.feeds.map(({ url }) => axios.get(generateAxiosGetRequestUrl(url)));
+  Promise.all(arrOfReq)
     .then((responsesData) => {
-      const arrOfNewPosts = responsesData.flatMap(
-        (responseData) => parseRSSFeed(responseData).posts,
-      );
-
       const existingPostsLinks = watchedState.posts
         .flat()
         .map((post) => post.link);
-
-      const arrOfNewPostsForAdding = arrOfNewPosts.filter(
-        (post) => !existingPostsLinks.includes(post.link),
-      );
+      const arrOfNewPostsForAdding = responsesData
+        .flatMap((responseData) => parseRSSFeed(responseData).posts)
+        .filter((post) => !existingPostsLinks.includes(post.link));
 
       if (arrOfNewPostsForAdding.length > 0) {
         watchedState.posts.push(...arrOfNewPostsForAdding);
       }
     })
-    .catch((error) => {
-      console.log(`Parsing error: ${error.message}`);
-    })
-    .finally(() => {
-      setTimeout(
-        () => updateExistingRssPostsWithTimer(watchedState),
-        TIMEOUT_SEC,
-      );
-    });
+    .catch((error) => console.log(`Parsing error: ${error.message}`))
+    .finally(() => setTimeout(
+      () => updateExistingRssPostsWithTimer(watchedState),
+      TIMEOUT_SEC,
+    ));
 };
