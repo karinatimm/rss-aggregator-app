@@ -6,7 +6,7 @@ import {
   generateAxiosGetRequestUrl,
   generateNewFeedObj,
   generateNewPostsObjOfFeed,
-  updateExistingRssPostsWithTimer,
+  //   updateExistingRssPostsWithTimer,
 } from './helpers.js';
 
 const handleValidationError = (state, i18nInstance, error) => {
@@ -69,7 +69,7 @@ export const controlValidationAndAxiosRequest = (
             newState.feeds.push(feedObj);
             newState.posts.push(postsObjOfCurrentFeed);
 
-            updateExistingRssPostsWithTimer(newState);
+            // updateExistingRssPostsWithTimer(newState);
           })
           .catch((error) => {
             const errorState = handleResponseAndNetworkError(
