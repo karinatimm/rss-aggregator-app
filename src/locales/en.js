@@ -1,5 +1,4 @@
 export default {
-  // Translation resources for English
   translation: {
     formTitle: 'RSS agregator',
     formSubtitle: 'Your main news is always at hand',
