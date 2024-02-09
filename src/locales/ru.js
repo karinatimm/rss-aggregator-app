@@ -1,5 +1,4 @@
 export default {
-  // // Translation resources for Russian
   translation: {
     formTitle: 'RSS агрегатор',
     formSubtitle: 'Твои главные новости всегда под рукой',
