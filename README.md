@@ -23,6 +23,42 @@ The RSS Aggregator is a web application designed to aggregate and display RSS fe
 This project has been deployed on Vercel and is accessible at the following URL:
 [RSS Aggregator on Vercel](https://frontend-project-11-nine-psi.vercel.app)
 
+## System Requirements if one wants to run the RSS Aggregator project locally:
+
+To run the RSS Aggregator project locally, ensure you have the following software installed on your system:
+
+- Node.js(version 20.3.0 LTS or higher) **(https://nodejs.org/)**
+- Node Package Manager(npm) **(https://www.npmjs.com/)**
+
+### Installation and usage instructions:
+
+Follow these steps to install and run RSS Aggregator project:
+
+- Check if Node.js and npm are installed:
+
+Check if you Node.js and npm are installed on your computer. If they are not installed, use the links provided in the "System requirements" section above to install them. If they are already installed, check their versions by opening your terminal or command prompt and running the following commands:
+
+**node -v**
+**npm -v**
+
+- Clone the RSS Aggregator project repository:
+
+Open the terminal or command prompt, navigate to your desired directory, and clone the repository from GitHub using the provided link:
+
+**git clone https://github.com/karinatimm/frontend-project-11.git**
+
+- Move to the project directory on your computer. If desired, rename the directory as required:
+
+**cd frontend-project-11**
+
+- Install project dependencies using npm:
+
+**npm ci**
+
+- Execute the following command to start working with this project locally by opening the localhost reference in the browser:
+
+  **npm run develop**
+
 ### Quality Assurance
 
 ### Hexlet tests and linter status:
