@@ -16,3 +16,4 @@ rules:
   no-console: 0
   import/extensions: off
   no-underscore-dangle: [2, { "allow": ["__filename", "__dirname"] }]
+  no-param-reassign: off
