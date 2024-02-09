@@ -1,7 +1,5 @@
 import onChange from 'on-change';
-// import * as yup from 'yup';
 import i18next from 'i18next';
-// import _ from 'lodash';
 import { renderUIView } from './view.js';
 import ru from './locales/ru.js';
 import en from './locales/en.js';
@@ -41,23 +39,23 @@ const initializeElements = (i18nInstance) => {
     watchBtn: i18nInstance.t('buttons.watchPostBtn'),
   };
 
-  const elements = { formEl, modalWindowEl, feedsAndPostsEl };
-  return elements;
+  return { formEl, modalWindowEl, feedsAndPostsEl };
 };
 
 const defaultLanguage = 'ru';
 
 const initializeI18n = () => {
   const i18nInstance = i18next.createInstance();
-  i18nInstance.init({
-    lng: defaultLanguage,
-    debug: false,
-    resources: {
-      ru,
-      en,
-    },
-  });
-  return i18nInstance;
+  return i18nInstance
+    .init({
+      lng: defaultLanguage,
+      debug: false,
+      resources: {
+        ru,
+        en,
+      },
+    })
+    .then(() => i18nInstance);
 };
 
 const initializeState = () => {
@@ -82,18 +80,21 @@ const initializeState = () => {
 };
 
 const initializeApp = () => {
-  const i18nInstance = initializeI18n();
-  const elements = initializeElements(i18nInstance);
   const state = initializeState();
   initializeYup();
 
-  const watchedState = onChange(state, (pathToEl) => {
-    renderUIView(state, i18nInstance, elements)(pathToEl);
+  initializeI18n().then((i18nInstance) => {
+    const elements = initializeElements(i18nInstance);
+
+    const watchedState = onChange(state, (pathToEl) => {
+      renderUIView(state, i18nInstance, elements)(pathToEl);
+    });
+    updateExistingRssPostsWithTimer(watchedState);
+
+    controlValidationAndAxiosRequest(watchedState, elements, i18nInstance);
+    controlClickedPostLinks(watchedState, elements);
+    controlModalWindow(watchedState, elements);
   });
-  updateExistingRssPostsWithTimer(watchedState);
-  controlValidationAndAxiosRequest(watchedState, elements, i18nInstance);
-  controlClickedPostLinks(watchedState, elements);
-  controlModalWindow(watchedState, elements);
 };
 
 export default initializeApp;
