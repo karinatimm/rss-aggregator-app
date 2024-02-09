@@ -86,21 +86,27 @@ export const generateNewPostsObjOfFeed = (parsedResponseData, uniqueFeedId) => {
 };
 
 export const updateExistingRssPostsWithTimer = (watchedState) => {
-  const arrOfReq = watchedState.feeds.map(({ url }) => axios.get(generateAxiosGetRequestUrl(url)));
-  Promise.all(arrOfReq)
-    .then((responsesData) => {
+  const arrOfRequestPromises = watchedState.feeds.map(({ url }) => axios
+    .get(generateAxiosGetRequestUrl(url))
+    .then((responseData) => parseRSSFeed(responseData).posts)
+    .catch((error) => {
+      console.log(`Parsing error from ${url}: ${error.message}`);
+      return [];
+    }));
+
+  Promise.all(arrOfRequestPromises)
+    .then((arrOfResponsesData) => {
       const existingPostsLinks = watchedState.posts
         .flat()
         .map((post) => post.link);
-      const arrOfNewPostsForAdding = responsesData
-        .flatMap((responseData) => parseRSSFeed(responseData).posts)
+      const arrOfNewPostsForAdding = arrOfResponsesData
+        .flat()
         .filter((post) => !existingPostsLinks.includes(post.link));
 
       if (arrOfNewPostsForAdding.length > 0) {
         watchedState.posts.push(...arrOfNewPostsForAdding);
       }
     })
-    .catch((error) => console.log(`Parsing error: ${error.message}`))
     .finally(() => setTimeout(
       () => updateExistingRssPostsWithTimer(watchedState),
       TIMEOUT_SEC,
