@@ -6,27 +6,22 @@ import {
   generateAxiosGetRequestUrl,
   generateNewFeedObj,
   generateNewPostsObjOfFeed,
-  //   updateExistingRssPostsWithTimer,
 } from './helpers.js';
 
-const handleValidationError = (state, i18nInstance, error) => {
-  const copyState = { ...state };
-  copyState.form.loadingProcess.processState = 'validationError';
-  copyState.form.validError = i18nInstance.t(error.message.key);
-  return copyState;
+const handleValidationError = (watchedState, i18nInstance, error) => {
+  watchedState.form.loadingProcess.processState = 'validationError';
+  watchedState.form.validError = i18nInstance.t(error.message.key);
 };
 
-const handleResponseAndNetworkError = (state, i18nInstance, error) => {
-  const copyState = { ...state };
-  copyState.form.loadingProcess.processState = 'responseAndNetworkError';
+const handleResponseAndNetworkError = (watchedState, i18nInstance, error) => {
+  watchedState.form.loadingProcess.processState = 'responseAndNetworkError';
   if (error.message === 'The XML document is not well-formed') {
-    copyState.form.loadingProcess.processError = i18nInstance.t('errors.noValidRss');
+    watchedState.form.loadingProcess.processError = i18nInstance.t('errors.noValidRss');
   } else {
-    copyState.form.loadingProcess.processError = i18nInstance.t(
+    watchedState.form.loadingProcess.processError = i18nInstance.t(
       'errors.errorNetwork',
     );
   }
-  return copyState;
 };
 
 export const controlValidationAndAxiosRequest = (
@@ -38,19 +33,18 @@ export const controlValidationAndAxiosRequest = (
     e.preventDefault();
 
     const inputUrlByUser = e.target.url.value;
-    const newState = { ...watchedState };
-    newState.form.loadingProcess.processState = 'formFilling';
+    watchedState.form.loadingProcess.processState = 'formFilling';
 
-    validateInputValue(newState, inputUrlByUser)
+    validateInputValue(watchedState, inputUrlByUser)
       .then((validUserUrl) => {
-        newState.form.loadingProcess.processState = 'completed';
-        newState.form.processError = null;
-        newState.form.arrOfValidUrls.push(inputUrlByUser);
-        newState.form.loadingProcess.processState = 'processingRequest';
+        watchedState.form.loadingProcess.processState = 'completed';
+        watchedState.form.processError = null;
+        watchedState.form.arrOfValidUrls.push(inputUrlByUser);
+        watchedState.form.loadingProcess.processState = 'processingRequest';
         axios
           .get(generateAxiosGetRequestUrl(validUserUrl))
           .then((responseData) => {
-            newState.form.loadingProcess.processState = 'completed';
+            watchedState.form.loadingProcess.processState = 'completed';
 
             const uniqueFeedId = _.uniqueId();
             const parsedResponseData = parseRSSFeed(responseData);
@@ -66,25 +60,15 @@ export const controlValidationAndAxiosRequest = (
               uniqueFeedId,
             );
 
-            newState.feeds.push(feedObj);
-            newState.posts.push(postsObjOfCurrentFeed);
-
-            // updateExistingRssPostsWithTimer(newState);
+            watchedState.feeds.push(feedObj);
+            watchedState.posts.push(postsObjOfCurrentFeed);
           })
           .catch((error) => {
-            const errorState = handleResponseAndNetworkError(
-              newState,
-              i18nInstance,
-              error,
-            );
-
-            Object.assign(watchedState, errorState);
+            handleResponseAndNetworkError(watchedState, i18nInstance, error);
           });
       })
       .catch((error) => {
-        const errorState = handleValidationError(newState, i18nInstance, error);
-
-        Object.assign(watchedState, errorState);
+        handleValidationError(watchedState, i18nInstance, error);
       });
   };
 
@@ -127,76 +111,12 @@ export const controlModalWindow = (watchedState, elements) => {
     const arrOfFlattenPosts = posts.flat();
     const post = arrOfFlattenPosts.find((postInarr) => postInarr.link === href);
 
-    const copyState = { ...watchedState };
-    copyState.stateUi.modalWindowContent = { post };
+    watchedState.stateUi.modalWindowContent = { post };
 
     if (!arrOfClickedPostLinks.includes(href)) {
       arrOfClickedPostLinks.push(href);
     }
-
-    Object.assign(watchedState, copyState);
   };
 
   modalWindow.addEventListener('show.bs.modal', handleModalWindow);
 };
-
-// export const controlValidationAndAxiosRequest = (
-//     watchedState,
-//     elements,
-//     i18nInstance
-//   ) => {
-//     const handleFormSubmit = (e) => {
-//       e.preventDefault();
-
-//       const inputUrlByUser = e.target.url.value;
-//       const newState = { ...watchedState };
-//       newState.form.loadingProcess.processState = "formFilling";
-
-//       validateInputValue(newState, inputUrlByUser)
-//         .then((validUserUrl) => {
-//           newState.form.loadingProcess.processState = "completed";
-//           newState.form.processError = null;
-//           newState.form.arrOfValidUrls.push(inputUrlByUser);
-//           // newState.form.loadingProcess.processState = "processingRequest";
-//           newState.form.loadingProcess.processState = "formFilling";
-//           axios
-//             .get(generateAxiosGetRequestUrl(validUserUrl))
-//             .then((responseData) => {
-//               const uniqueFeedId = _.uniqueId();
-//               const parsedResponseData = parseRSSFeed(responseData);
-//               newState.form.loadingProcess.processState = "completed";
-//               const feedObj = generateNewFeedObj(
-//                 parsedResponseData,
-//                 uniqueFeedId,
-//                 validUserUrl
-//               );
-
-//               const postsObjOfCurrentFeed = generateNewPostsObjOfFeed(
-//                 parsedResponseData,
-//                 uniqueFeedId
-//               );
-
-//               newState.feeds.push(feedObj);
-//               newState.posts.push(postsObjOfCurrentFeed);
-
-//               // updateExistingRssPostsWithTimer(newState);
-//             })
-//             .catch((error) => {
-//               const errorState = handleResponseAndNetworkError(
-//                 newState,
-//                 i18nInstance,
-//                 error
-//               );
-
-//               Object.assign(watchedState, errorState);
-//             });
-//         })
-//         .catch((error) => {
-//           const errorState = handleValidationError(newState, i18nInstance, error);
-
-//           Object.assign(watchedState, errorState);
-//         });
-//     };
-
-//     elements.formEl.form.addEventListener("submit", handleFormSubmit);
-//   };
