@@ -1,7 +1,7 @@
 import axios from 'axios';
 import * as yup from 'yup';
 import _ from 'lodash';
-import TIMEOUT_SEC from './config.js';
+import { TIMEOUT_SEC } from './config.js';
 
 export const initializeYup = () => {
   yup.setLocale({
@@ -13,8 +13,11 @@ export const initializeYup = () => {
     },
   });
 };
+// export const createValidationSchema = (state) =>
+//   yup.string().trim().required().url().notOneOf(state.form.arrOfValidUrls);
+
 export const createValidationSchema = (state) => yup.string().trim().required().url()
-  .notOneOf(state.form.arrOfValidUrls);
+  .notOneOf(state.feeds);
 
 export const validateInputValue = (state, url) => {
   const validationSchema = createValidationSchema(state);
