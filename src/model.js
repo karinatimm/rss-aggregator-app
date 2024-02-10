@@ -57,6 +57,7 @@ export const initializeState = () => {
         processError: null,
       },
       validError: null,
+      arrOfValidUrls: [],
     },
     posts: [],
     feeds: [],
