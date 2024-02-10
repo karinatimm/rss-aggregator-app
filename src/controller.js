@@ -37,9 +37,7 @@ export const controlValidationAndAxiosRequest = (
 
     validateInputValue(watchedState, inputUrlByUser)
       .then((validUserUrl) => {
-        watchedState.form.loadingProcess.processState = 'completed';
         watchedState.form.processError = null;
-        watchedState.form.arrOfValidUrls.push(inputUrlByUser);
         watchedState.form.loadingProcess.processState = 'processingRequest';
         axios
           .get(generateAxiosGetRequestUrl(validUserUrl))
@@ -86,10 +84,7 @@ export const controlClickedPostLinks = (watchedState, elements) => {
       const clickedPostLink = clickedElement.getAttribute('href');
 
       if (!arrOfClickedPostLinks.includes(clickedPostLink)) {
-        const copyState = { ...watchedState };
-        copyState.stateUi.arrOfClickedPostLinks.push(clickedPostLink);
-
-        Object.assign(watchedState, copyState);
+        watchedState.stateUi.arrOfClickedPostLinks.push(clickedPostLink);
       }
     }
   };
