@@ -1,17 +1,9 @@
-import onChange from 'on-change';
 import i18next from 'i18next';
-import { renderUIView } from './view.js';
+import { DEFAULT_LANGUAGE } from './config.js';
 import ru from './locales/ru.js';
 import en from './locales/en.js';
-import {
-  controlClickedPostLinks,
-  controlModalWindow,
-  controlValidationAndAxiosRequest,
-} from './controller.js';
 
-import { updateExistingRssPostsWithTimer, initializeYup } from './helpers.js';
-
-const initializeElements = (i18nInstance) => {
+export const initializeElements = (i18nInstance) => {
   const formEl = {
     formInput: document.querySelector('#url-input'),
     form: document.querySelector('.rss-form'),
@@ -42,13 +34,11 @@ const initializeElements = (i18nInstance) => {
   return { formEl, modalWindowEl, feedsAndPostsEl };
 };
 
-const defaultLanguage = 'ru';
-
-const initializeI18n = () => {
+export const initializeI18n = () => {
   const i18nInstance = i18next.createInstance();
   return i18nInstance
     .init({
-      lng: defaultLanguage,
+      lng: DEFAULT_LANGUAGE,
       debug: false,
       resources: {
         ru,
@@ -58,16 +48,15 @@ const initializeI18n = () => {
     .then(() => i18nInstance);
 };
 
-const initializeState = () => {
+export const initializeState = () => {
   const state = {
-    lng: defaultLanguage,
+    lng: DEFAULT_LANGUAGE,
     form: {
       loadingProcess: {
         processState: 'formFilling',
         processError: null,
       },
       validError: null,
-      arrOfValidUrls: [],
     },
     posts: [],
     feeds: [],
@@ -78,23 +67,3 @@ const initializeState = () => {
   };
   return state;
 };
-
-const initializeApp = () => {
-  const state = initializeState();
-  initializeYup();
-
-  initializeI18n().then((i18nInstance) => {
-    const elements = initializeElements(i18nInstance);
-
-    const watchedState = onChange(state, (pathToEl) => {
-      renderUIView(state, i18nInstance, elements)(pathToEl);
-    });
-    updateExistingRssPostsWithTimer(watchedState);
-
-    controlValidationAndAxiosRequest(watchedState, elements, i18nInstance);
-    controlClickedPostLinks(watchedState, elements);
-    controlModalWindow(watchedState, elements);
-  });
-};
-
-export default initializeApp;
