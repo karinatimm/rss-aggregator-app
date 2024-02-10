@@ -13,11 +13,11 @@ export const initializeYup = () => {
     },
   });
 };
-// export const createValidationSchema = (state) =>
-//   yup.string().trim().required().url().notOneOf(state.form.arrOfValidUrls);
-
 export const createValidationSchema = (state) => yup.string().trim().required().url()
-  .notOneOf(state.feeds);
+  .notOneOf(state.form.arrOfValidUrls);
+
+// export const createValidationSchema = (state) => yup.string().trim().required().url()
+//   .notOneOf(state.feeds);
 
 export const validateInputValue = (state, url) => {
   const validationSchema = createValidationSchema(state);
