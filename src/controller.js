@@ -43,6 +43,7 @@ export const controlValidationAndAxiosRequest = (
           .get(generateAxiosGetRequestUrl(validUserUrl))
           .then((responseData) => {
             watchedState.form.loadingProcess.processState = 'completed';
+            watchedState.form.arrOfValidUrls.push(inputUrlByUser);
 
             const uniqueFeedId = _.uniqueId();
             const parsedResponseData = parseRSSFeed(responseData);
