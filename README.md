@@ -1,4 +1,4 @@
-# RSS Aggregator Project
+# The RSS Aggregator App
 
 ### Progect description:
 
@@ -25,14 +25,14 @@ This project has been deployed on Vercel and is accessible at the following URL:
 
 ## System Requirements if one wants to run the RSS Aggregator project locally:
 
-To run the RSS Aggregator project locally, ensure you have the following software installed on your system:
+To run the RSS Aggregator app locally, ensure you have the following software installed on your system:
 
 - Node.js(version 20.3.0 LTS or higher) **(https://nodejs.org/)**
 - Node Package Manager(npm) **(https://www.npmjs.com/)**
 
 ### Installation and usage instructions:
 
-Follow these steps to install and run RSS Aggregator project:
+Follow these steps to install and run RSS Aggregator app:
 
 - Check if Node.js and npm are installed:
 
@@ -41,15 +41,15 @@ Check if you Node.js and npm are installed on your computer. If they are not ins
 **node -v**
 **npm -v**
 
-- Clone the RSS Aggregator project repository:
+- Clone the RSS Aggregator app repository:
 
 Open the terminal or command prompt, navigate to your desired directory, and clone the repository from GitHub using the provided link:
 
-**git clone https://github.com/karinatimm/frontend-project-11.git**
+**git clone https://github.com/karinatimm/RSS-Aggregator-App.git**
 
 - Move to the project directory on your computer. If desired, rename the directory as required:
 
-**cd frontend-project-11**
+**cd RSS-Aggregator-App**
 
 - Install project dependencies using npm:
 
@@ -63,8 +63,8 @@ Open the terminal or command prompt, navigate to your desired directory, and clo
 
 ### Hexlet tests and linter status:
 
-[![Actions Status](https://github.com/karinatimm/frontend-project-11/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/karinatimm/frontend-project-11/actions)
+[![Actions Status](https://github.com/karinatimm/RSS-Aggregator-App/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/karinatimm/RSS-Aggregator-App/actions)
 
 ### CodeClimate badge in order to display this project's quality:
 
-[![Maintainability](https://api.codeclimate.com/v1/badges/5008988e470b6d860762/maintainability)](https://codeclimate.com/github/karinatimm/frontend-project-11/maintainability)
+[![Maintainability](https://api.codeclimate.com/v1/badges/5008988e470b6d860762/maintainability)](https://codeclimate.com/github/karinatimm/RSS-Aggregator-App/maintainability)
