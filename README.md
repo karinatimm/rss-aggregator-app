@@ -78,3 +78,7 @@ Open the terminal or command prompt, navigate to your desired directory, and clo
 ### CodeClimate badge in order to display this project's quality:
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/5008988e470b6d860762/maintainability)](https://codeclimate.com/github/karinatimm/RSS-Aggregator-App/maintainability)
+
+### Linter status:
+
+[![ESLint Status](https://img.shields.io/badge/ESLint-Passing-brightgreen.svg)](https://github.com/karinatimm/RSS-Aggregator-App.git)
