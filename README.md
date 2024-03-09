@@ -18,6 +18,16 @@ The RSS Aggregator is a web application designed to aggregate and display RSS fe
 
 - **Responsive Design**: The application is designed to be responsive and work seamlessly across different devices.
 
+### Here are some real RSS feeds for testing or your daily use:
+
+- **https://aljazeera.com/xml/rss/all.xml**
+- **https://buzzfeed.com/world.xml**
+- **https://thecipherbrief.com/feed**
+- **https://rt.com/rss/news**
+- **http://www.dp.ru/exportnews.xml**
+- **http://www.fontanka.ru/fontanka.rss**
+- **http://lenta.ru/l/r/EX/import.rss**
+
 ### Deployment
 
 This project has been deployed on Vercel and is accessible at the following URL:
