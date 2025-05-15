@@ -28,7 +28,7 @@ The RSS Aggregator is a web application designed to aggregate and display RSS fe
 ### Deployment
 
 This project has been deployed on Vercel and is accessible at the following URL:
-[RSS Aggregator on Vercel](https://rss-aggregator-gypoufdhq-karinas-projects-e74ba04a.vercel.app/)
+[RSS Aggregator on Vercel](https://rss-aggregator-app.vercel.app/)
 
 ## System Requirements if one wants to run the RSS Aggregator project locally:
 
